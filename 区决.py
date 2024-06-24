@@ -106,25 +106,25 @@ def calculate_qualification_probability(simulations):
 
 
 random.seed(int(time.time()))
-wb = Workbook()
-ws = wb.active
-first_row = ["队伍", "当前积分", "晋级概率"]
-for i in range(20):
-    first_row.append(f"第{i + 1}名")
-ws.append(first_row)
-simulations = 100000
+# wb = Workbook()
+# ws = wb.active
+# first_row = ["队伍", "当前积分", "晋级概率"]
+# for i in range(20):
+    # first_row.append(f"第{i + 1}名")
+# ws.append(first_row)
+simulations = 1000000
 qualification_probabilities, qua_ratio = calculate_qualification_probability(simulations)
 for team_name in qualification_probabilities.keys():
-    row = [team_name, teams[team_name], qua_ratio[team_name]]
+    # row = [team_name, teams[team_name], qua_ratio[team_name]]
     print(f"晋级概率 ({team_name}):")
     for rank, probability in sorted(qualification_probabilities[team_name].items()):
-        row.append(probability)
+        # row.append(probability)
         if rank == 10 or rank == 20:
             print(f"名次 {rank}: {probability:.2%}")
         else:
             print(f"名次 {rank}: {probability:.2%}", end="\t")
-    ws.append(row)
-for row in ws.iter_rows(min_row=2, max_row=21, min_col=3, max_col=23):
-    for cell in row:
-        cell.number_format = numbers.FORMAT_PERCENTAGE_00
-wb.save(f"results_{simulations}.xlsx")
+    # ws.append(row)
+# for row in ws.iter_rows(min_row=2, max_row=21, min_col=3, max_col=23):
+#     for cell in row:
+#         cell.number_format = numbers.FORMAT_PERCENTAGE_00
+# wb.save(f"results_{simulations}.xlsx")
