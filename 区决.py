@@ -80,7 +80,7 @@ def determine_qualifiers(teams, round_ranking):
 def calculate_qualification_probability(simulations):
     qualification_counts = {key: defaultdict(int) for key in teams.keys()}
     rank_counts = {key: defaultdict(int) for key in teams.keys()}
-
+    qua_ratio = {key: 0 for key in teams.keys()}
     with tqdm(total=simulations, desc="Simulating") as progress_bar:
         for _ in range(simulations):
             current_teams = teams.copy()
@@ -91,16 +91,18 @@ def calculate_qualification_probability(simulations):
                 rank_counts[team][rank + 1] += 1
                 if team in qualifiers:
                     qualification_counts[team][rank + 1] += 1
+                    qua_ratio[team] += 1
             progress_bar.update(1)
 
     qualification_probabilities = {key: {} for key in teams.keys()}
     for res_team in rank_counts:
+        qua_ratio[res_team] = qua_ratio[res_team] / simulations
         for rank in rank_counts[res_team]:
             qualification_probabilities[res_team][rank] = (
                 qualification_counts[res_team][rank] / rank_counts[res_team][rank]
             )
 
-    return qualification_probabilities
+    return qualification_probabilities, qua_ratio
 
 
 random.seed(int(time.time()))
@@ -110,19 +112,19 @@ first_row = ["队伍", "当前积分", "晋级概率"]
 for i in range(20):
     first_row.append(f"第{i + 1}名")
 ws.append(first_row)
-simulations=10000000
-qualification_probabilities = calculate_qualification_probability(simulations)
+simulations = 100000
+qualification_probabilities, qua_ratio = calculate_qualification_probability(simulations)
 for team_name in qualification_probabilities.keys():
-    row = [team_name, teams[team_name], ""]
+    row = [team_name, teams[team_name], qua_ratio[team_name]]
     print(f"晋级概率 ({team_name}):")
     for rank, probability in sorted(qualification_probabilities[team_name].items()):
         row.append(probability)
         if rank == 10 or rank == 20:
-            print(f"名次 {rank}:\t{probability:.2%}")
+            print(f"名次 {rank}: {probability:.2%}")
         else:
-            print(f"名次 {rank}:\t{probability:.2%}", end="\t")
+            print(f"名次 {rank}: {probability:.2%}", end="\t")
     ws.append(row)
-for row in ws.iter_rows(min_row=2, max_row=21, min_col=4, max_col=23):
+for row in ws.iter_rows(min_row=2, max_row=21, min_col=3, max_col=23):
     for cell in row:
         cell.number_format = numbers.FORMAT_PERCENTAGE_00
 wb.save(f"results_{simulations}.xlsx")
